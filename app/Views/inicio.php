@@ -21,6 +21,11 @@
             max-width: 600px;
             margin: 30px auto;
         }
+
+        .alert {
+            max-width: 800px;
+            margin: 20px auto;
+        }
     </style>
 </head>
 <body>
@@ -37,12 +42,31 @@
 
     <div class="container">
         <div class="user-card text-center">
-            <h1 class="mb-4">Bienvenido, Usuario</h1>
-            <p class="lead">Explora las opciones disponibles en tu cuenta.</p>
-            <div class="text-center mt-4">
-                <a href="#" class="btn btn-primary">Ver Perfil</a>
-                <a href="#" class="btn btn-success">Consultar Datos</a>
-            </div>
+            <h1 class="mb-4">Consultar Estudiante</h1>
+            <p class="lead">Ingrese el código del estudiante para obtener sus datos.</p>
+
+            <!-- Formulario para consultar estudiante -->
+            <form action="<?= base_url('inicio/consultarEstudiante') ?>" method="post" class="text-center">
+                <label for="codigo" class="text-white">Código del Estudiante:</label>
+                <input type="text" name="codigo" id="codigo" class="form-control" placeholder="Ejemplo: 123456" required>
+                <button type="submit" class="btn btn-primary mt-3">Consultar</button>
+            </form>
+
+            <!-- Mostrar errores -->
+            <?php if (isset($error)): ?>
+                <div class="alert alert-danger mt-3"><?= $error ?></div>
+            <?php endif; ?>
+
+            <!-- Mostrar datos del estudiante -->
+            <?php if (isset($nombres)): ?>
+                <div class="alert alert-success mt-3">
+                    <h4>Datos del Estudiante:</h4>
+                    <p><strong>Nombres:</strong> <?= $nombres ?></p>
+                    <p><strong>Apellidos:</strong> <?= $apellidos ?></p>
+                    <p><strong>Correo Institucional:</strong> <?= $correo ?></p>
+                    <p><strong>Celular:</strong> <?= $celular ?></p>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 

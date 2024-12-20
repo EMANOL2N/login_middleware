@@ -24,31 +24,43 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Admin Panel - <?= session('usuario') ?></a>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= base_url('/salir') ?>">Cerrar Sesión</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-
     <div class="container">
         <div class="admin-card">
-            <h1 class="text-center">Bienvenido, Administrador</h1>
-            <p class="lead text-center">Aquí puedes gestionar las configuraciones del sistema, usuarios y más.</p>
-            <div class="text-center mt-4">
-                <a href="#" class="btn btn-primary">Gestionar Usuarios</a>
-                <a href="#" class="btn btn-success">Ver Reportes</a>
-                <a href="#" class="btn btn-warning">Configuraciones</a>
-            </div>
+            <h3>Consulta DNI</h3>
+            <!-- Formulario para ingresar DNI -->
+            <form action="<?= base_url('admin/consultarDNI') ?>" method="POST">
+                <div class="form-group">
+                    <label for="dni">Número de DNI</label>
+                    <input type="text" class="form-control" id="dni" name="dni" placeholder="Ingresa el DNI">
+                </div>
+                <button type="submit" class="btn btn-primary">Consultar</button>
+            </form>
+
+            <!-- Mostrar mensaje de error si no se encuentra el DNI -->
+            <?php if (isset($error)): ?>
+                <div class="alert alert-danger mt-4">
+                    <?= $error ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Mostrar datos si el DNI fue encontrado -->
+            <?php if (isset($persona)): ?>
+                <div class="mt-4">
+                    <h5>Información de la Persona</h5>
+                    <ul>
+                        <li><strong>DNI:</strong> <?= $persona->numeroDocumento ?></li>
+                        <li><strong>Nombre:</strong> <?= $persona->nombres ?></li>
+                        <li><strong>Apellido Paterno:</strong> <?= $persona->apellidoPaterno ?></li>
+                        <li><strong>Apellido Materno:</strong> <?= $persona->apellidoMaterno ?></li>
+                        <li><strong>Tipo de Documento:</strong> <?= $persona->tipoDocumento ?></li>
+                        <li><strong>Dígito Verificador:</strong> <?= $persona->digitoVerificador ?></li>
+                    </ul>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

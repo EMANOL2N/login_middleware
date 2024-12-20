@@ -79,6 +79,99 @@ class Home extends BaseController
         }
     }
 
+    public function consultarEstudiante()
+    {
+        $session = session();
+
+        // Verificar si el usuario tiene rol de usuario
+        if ($session->get('role_id') != 2) {
+            return redirect()->to(base_url('/no_permission'));
+        }
+
+        // Obtener el código del estudiante desde el formulario
+        $codigoEstudiante = $this->request->getPost('codigo');
+        
+        // Validar que el código no esté vacío
+        if (empty($codigoEstudiante)) {
+            return redirect()->back()->with('error', 'Por favor ingresa un código de estudiante');
+        }
+
+        // Llamada a la API de Strapi
+        $url = 'http://34.67.217.173:1337/api/finuxfinesis?filters[Codigo][$eq]=' . $codigoEstudiante;
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Opcional si tienes problemas con SSL
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $data = json_decode($response, true);
+
+        // Manejar la respuesta de la API
+        if (isset($data['data'][0])) {
+            $estudiante = $data['data'][0];
+            return view('inicio', [
+                'nombres' => $estudiante['Nombres'],
+                'apellidos' => $estudiante['Apellidos'],
+                'correo' => $estudiante['CorreoInstitucional'],
+                'celular' => $estudiante['Celular']
+            ]);
+        } else {
+            return view('inicio', ['error' => 'Estudiante no encontrado.']);
+        }
+    }
+
+    public function consultarDNI()
+        {
+            // Verificar si el usuario tiene rol de admin
+            $session = session();
+            if ($session->get('role_id') != 1) {
+                // Redirigir a "Acceso Denegado" si no es admin
+                return redirect()->to(base_url('/no_permission'));
+            }
+
+            // Obtener el DNI desde el formulario
+            $dni = $this->request->getPost('dni');
+            
+            // Validar que el DNI no esté vacío
+            if (empty($dni)) {
+                return redirect()->back()->with('error', 'Por favor ingresa un número de DNI');
+            }
+
+            // Token de la API
+            $token = 'apis-token-11902.pdect35br18u4qfOY32SlAiD745fr8i4';
+
+            // Llamada a la API
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://api.apis.net.pe/v2/reniec/dni?numero=' . $dni,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_SSL_VERIFYPEER => 0,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 2,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+                CURLOPT_HTTPHEADER => array(
+                    'Referer: https://apis.net.pe/consulta-dni-api',
+                    'Authorization: Bearer ' . $token
+                ),
+            ));
+
+            $response = curl_exec($curl);
+            curl_close($curl);
+
+            // Decodificar la respuesta
+            $persona = json_decode($response);
+
+            // Verificar si la respuesta es válida
+            if (isset($persona->nombres)) {
+                return view('admin', ['persona' => $persona]);
+            } else {
+                return view('admin', ['error' => 'No se encontraron datos para el DNI proporcionado.']);
+            }
+        }
 
     public function salir()
     {
