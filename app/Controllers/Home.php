@@ -44,6 +44,78 @@ class Home extends BaseController
         return view('admin');
     }
 
+    public function misTutorados()
+    {
+        $session = session();
+
+        // Verificar si el usuario tiene rol de admin
+        if ($session->get('role_id') != 1) {
+            return redirect()->to(base_url('/no_permission'));
+        }
+
+        // Retornar la vista de "Mis Tutorados"
+        return view('admin/mis_tutorados');
+    }
+
+    public function tutoriasFinalizadas()
+    {
+        $session = session();
+
+        // Verificar si el usuario tiene rol de admin
+        if ($session->get('role_id') != 1) {
+            return redirect()->to(base_url('/no_permission'));
+        }
+
+        // Retornar la vista de "Tutorías Finalizadas"
+        return view('admin/tutorias_finalizadas');
+    }
+
+    public function chat()
+    {
+        $session = session();
+
+        // Verificar si el usuario tiene rol de admin
+        if ($session->get('role_id') != 1) {
+            return redirect()->to(base_url('/no_permission'));
+        }
+
+        // Retornar la vista de "Chat"
+        return view('admin/chat');
+    }
+
+    public function misTutores()
+    {
+        $session = session();
+
+        if ($session->get('role_id') != 2) {
+            return redirect()->to(base_url('/no_permission'));
+        }
+
+        return view('estudiante/mis_tutores');
+    }
+
+    public function tutoriasFinalizadasEstudiante()
+    {
+        $session = session();
+
+        if ($session->get('role_id') != 2) {
+            return redirect()->to(base_url('/no_permission'));
+        }
+
+        return view('estudiante/tutorias_finalizadas');
+    }
+
+    public function chatEstudiante()
+    {
+        $session = session();
+
+        if ($session->get('role_id') != 2) {
+            return redirect()->to(base_url('/no_permission'));
+        }
+
+        return view('estudiante/chat');
+    }
+
     public function login()
     {
         // Recibir datos del formulario
@@ -123,55 +195,55 @@ class Home extends BaseController
     }
 
     public function consultarDNI()
-        {
-            // Verificar si el usuario tiene rol de admin
-            $session = session();
-            if ($session->get('role_id') != 1) {
-                // Redirigir a "Acceso Denegado" si no es admin
-                return redirect()->to(base_url('/no_permission'));
-            }
-
-            // Obtener el DNI desde el formulario
-            $dni = $this->request->getPost('dni');
-            
-            // Validar que el DNI no esté vacío
-            if (empty($dni)) {
-                return redirect()->back()->with('error', 'Por favor ingresa un número de DNI');
-            }
-
-            // Token de la API
-            $token = 'apis-token-11902.pdect35br18u4qfOY32SlAiD745fr8i4';
-
-            // Llamada a la API
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://api.apis.net.pe/v2/reniec/dni?numero=' . $dni,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_SSL_VERIFYPEER => 0,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 2,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_CUSTOMREQUEST => 'GET',
-                CURLOPT_HTTPHEADER => array(
-                    'Referer: https://apis.net.pe/consulta-dni-api',
-                    'Authorization: Bearer ' . $token
-                ),
-            ));
-
-            $response = curl_exec($curl);
-            curl_close($curl);
-
-            // Decodificar la respuesta
-            $persona = json_decode($response);
-
-            // Verificar si la respuesta es válida
-            if (isset($persona->nombres)) {
-                return view('admin', ['persona' => $persona]);
-            } else {
-                return view('admin', ['error' => 'No se encontraron datos para el DNI proporcionado.']);
-            }
+    {
+        // Verificar si el usuario tiene rol de admin
+        $session = session();
+        if ($session->get('role_id') != 1) {
+            // Redirigir a "Acceso Denegado" si no es admin
+            return redirect()->to(base_url('/no_permission'));
         }
+
+        // Obtener el DNI desde el formulario
+        $dni = $this->request->getPost('dni');
+        
+        // Validar que el DNI no esté vacío
+        if (empty($dni)) {
+            return redirect()->back()->with('error', 'Por favor ingresa un número de DNI');
+        }
+
+        // Token de la API
+        $token = 'apis-token-11902.pdect35br18u4qfOY32SlAiD745fr8i4';
+
+        // Llamada a la API
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.apis.net.pe/v2/reniec/dni?numero=' . $dni,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => 0,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 2,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Referer: https://apis.net.pe/consulta-dni-api',
+                'Authorization: Bearer ' . $token
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+
+        // Decodificar la respuesta
+        $persona = json_decode($response);
+
+        // Verificar si la respuesta es válida
+        if (isset($persona->nombres)) {
+            return view('admin', ['persona' => $persona]);
+        } else {
+            return view('admin', ['error' => 'No se encontraron datos para el DNI proporcionado.']);
+        }
+    }
 
     public function salir()
     {
