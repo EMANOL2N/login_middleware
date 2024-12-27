@@ -9,7 +9,62 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-    
+    <style>
+        body {
+            background-color: #f7f9fc;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar {
+            background-color: #003865;
+        }
+
+        .navbar-brand {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .navbar .nav-link {
+            color: #fff !important;
+        }
+
+        .sidebar {
+            background-color: #003865;
+            color: #fff;
+            height: 100vh;
+            position: fixed;
+            padding: 20px 10px;
+            width: 250px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #0056b3;
+        }
+
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+        }
+
+        .card {
+            margin-top: 20px;
+        }
+
+        .alert {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
