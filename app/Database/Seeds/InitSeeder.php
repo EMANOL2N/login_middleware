@@ -39,5 +39,23 @@ class InitSeeder extends Seeder
             ['role_id' => 1, 'permission_id' => 1], // admin -> admin_access
             ['role_id' => 2, 'permission_id' => 2]  // user -> user_access
         ]);
+
+        // Insertar labs (solo si aún no están en la base de datos)
+        $this->db->table('labs')->insertBatch([
+            ['id' => 1, 'name' => 'LAB01'],
+            ['id' => 2, 'name' => 'LAB02']
+        ]);
+
+        // Reservas de ejemplo
+        $this->db->table('reservations')->insertBatch([
+            [
+                'user_id' => 1,  // admin
+                'lab_id'  => 1,  // Ejemplo: LAB1
+                'start_time' => '2025-07-09 10:00:00',
+                'end_time'   => '2025-07-09 12:00:00',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ]
+        ]);
     }
 }

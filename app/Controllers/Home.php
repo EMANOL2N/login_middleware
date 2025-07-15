@@ -2,16 +2,20 @@
 
 namespace App\Controllers;
 
-use App\Models\AclModel; // Usar AclModel
+use App\Models\AclModel;
+use CodeIgniter\I18n\Time;
+use App\Models\ReservationsModel;
 
 class Home extends BaseController
 {
+    // Página principal (login)
     public function index(): string
     {
         $mensaje = session('mensaje');
         return view('login', ["mensaje" => $mensaje]);
     }
 
+    // Vista para estudiante (docente)
     public function inicio()
     {
         $session = session();
@@ -25,18 +29,19 @@ class Home extends BaseController
         return view('inicio');
     }
 
+    // Vista de acceso denegado
     public function noPermission()
     {
-        return view('no_permission'); // Crear una vista para mostrar "Acceso Denegado"
+        return view('no_permission');
     }
 
+    // Vista para administrador
     public function admin()
     {
         $session = session();
 
         // Verificar si el usuario tiene rol de admin
         if ($session->get('role_id') != 1) {
-            // Redirigir al usuario a "Acceso Denegado" si no es admin
             return redirect()->to(base_url('/no_permission'));
         }
 
@@ -44,46 +49,24 @@ class Home extends BaseController
         return view('admin');
     }
 
-    public function misTutorados()
+    // Vista de laboratorio para el administrador
+    public function laboratoriosAdmin()
     {
         $session = session();
-
-        // Verificar si el usuario tiene rol de admin
         if ($session->get('role_id') != 1) {
             return redirect()->to(base_url('/no_permission'));
         }
-
-        // Retornar la vista de "Mis Tutorados"
-        return view('admin/mis_tutorados');
+        // Obtener eventos desde la base de datos
+        $db = \Config\Database::connect();
+        $builder = $db->table('reservations r');
+        $builder->select('r.id, u.username AS title, r.start_time AS start, r.end_time AS end, r.lab_id');
+        $builder->join('users u', 'u.id = r.user_id');
+        $events = $builder->get()->getResultArray();
+        return view('admin/laboratorios', ['events' => $events]);
     }
 
-    public function tutoriasFinalizadas()
-    {
-        $session = session();
-
-        // Verificar si el usuario tiene rol de admin
-        if ($session->get('role_id') != 1) {
-            return redirect()->to(base_url('/no_permission'));
-        }
-
-        // Retornar la vista de "Tutorías Finalizadas"
-        return view('admin/tutorias_finalizadas');
-    }
-
-    public function chat()
-    {
-        $session = session();
-
-        // Verificar si el usuario tiene rol de admin
-        if ($session->get('role_id') != 1) {
-            return redirect()->to(base_url('/no_permission'));
-        }
-
-        // Retornar la vista de "Chat"
-        return view('admin/chat');
-    }
-
-    public function misTutores()
+    // Vista de laboratorio para docentes
+    public function laboratoriosDocentes()
     {
         $session = session();
 
@@ -91,164 +74,128 @@ class Home extends BaseController
             return redirect()->to(base_url('/no_permission'));
         }
 
-        return view('estudiante/mis_tutores');
+        // Obtener eventos desde la base de datos
+        $db = \Config\Database::connect();
+        $builder = $db->table('reservations r');
+        $builder->select('r.id, u.username AS title, r.start_time AS start, r.end_time AS end, r.lab_id');
+        $builder->join('users u', 'u.id = r.user_id');
+        $events = $builder->get()->getResultArray();
+
+        // Pasar los eventos a la vista
+        return view('docente/laboratorios', ['events' => $events]);
     }
 
-    public function tutoriasFinalizadasEstudiante()
-    {
-        $session = session();
-
-        if ($session->get('role_id') != 2) {
-            return redirect()->to(base_url('/no_permission'));
-        }
-
-        return view('estudiante/tutorias_finalizadas');
-    }
-
-    public function chatEstudiante()
-    {
-        $session = session();
-
-        if ($session->get('role_id') != 2) {
-            return redirect()->to(base_url('/no_permission'));
-        }
-
-        return view('estudiante/chat');
-    }
-
+    // Función para iniciar sesión
     public function login()
     {
-        // Recibir datos del formulario
+        $AclModel = new AclModel();
         $usuario = $this->request->getPost('usuario');
         $password = $this->request->getPost('password');
 
-        // Instanciar el modelo
-        $AclModel = new \App\Models\AclModel();
+        // Obtén los datos del usuario
         $datosUsuario = $AclModel->obtenerUsuario(['username' => $usuario]);
 
-        // Validar credenciales
+        // Verifica si el usuario existe y la contraseña es correcta
         if (count($datosUsuario) > 0 && password_verify($password, $datosUsuario[0]['password'])) {
-            // Guardar datos en la sesión
+            // Guarda datos del usuario en la sesión
             $session = session();
             $session->set([
-                "id" => $datosUsuario[0]['id'], // ID del usuario
-                "usuario" => $datosUsuario[0]['username'],
-                "role_id" => $datosUsuario[0]['role_id'] // Rol del usuario
+                'id_usuario' => $datosUsuario[0]['id'],
+                'username' => $datosUsuario[0]['username'],
+                'role_id' => $datosUsuario[0]['role_id'],
+                'is_logged_in' => true,
             ]);
 
-            // Redirigir según el rol
-            if ($datosUsuario[0]['role_id'] == 1) { // Admin
-                return redirect()->to(base_url('/admin')); // Ruta de admin
-            } elseif ($datosUsuario[0]['role_id'] == 2) { // User
-                return redirect()->to(base_url('/inicio')); // Ruta de usuario
+            // Redirige según el rol del usuario
+            if ($datosUsuario[0]['role_id'] == 1) {
+                return redirect()->to(base_url('/admin'));
+            } elseif ($datosUsuario[0]['role_id'] == 2) {
+                return redirect()->to(base_url('/inicio'));
             } else {
-                // Rol desconocido: redirigir a acceso denegado
                 return redirect()->to(base_url('/no_permission'));
             }
         } else {
-            // Credenciales incorrectas
             return redirect()->to(base_url('/'))->with('mensaje', 'Usuario o contraseña incorrectos.');
         }
     }
 
-    public function consultarEstudiante()
-    {
-        $session = session();
-
-        // Verificar si el usuario tiene rol de usuario
-        if ($session->get('role_id') != 2) {
-            return redirect()->to(base_url('/no_permission'));
-        }
-
-        // Obtener el código del estudiante desde el formulario
-        $codigoEstudiante = $this->request->getPost('codigo');
-        
-        // Validar que el código no esté vacío
-        if (empty($codigoEstudiante)) {
-            return redirect()->back()->with('error', 'Por favor ingresa un código de estudiante');
-        }
-
-        // Llamada a la API de Strapi
-        $url = 'http://34.67.217.173:1337/api/finuxfinesis?filters[Codigo][$eq]=' . $codigoEstudiante;
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Opcional si tienes problemas con SSL
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        $data = json_decode($response, true);
-
-        // Manejar la respuesta de la API
-        if (isset($data['data'][0])) {
-            $estudiante = $data['data'][0];
-            return view('inicio', [
-                'nombres' => $estudiante['Nombres'],
-                'apellidos' => $estudiante['Apellidos'],
-                'correo' => $estudiante['CorreoInstitucional'],
-                'celular' => $estudiante['Celular']
-            ]);
-        } else {
-            return view('inicio', ['error' => 'Estudiante no encontrado.']);
-        }
-    }
-
-    public function consultarDNI()
-    {
-        // Verificar si el usuario tiene rol de admin
-        $session = session();
-        if ($session->get('role_id') != 1) {
-            // Redirigir a "Acceso Denegado" si no es admin
-            return redirect()->to(base_url('/no_permission'));
-        }
-
-        // Obtener el DNI desde el formulario
-        $dni = $this->request->getPost('dni');
-        
-        // Validar que el DNI no esté vacío
-        if (empty($dni)) {
-            return redirect()->back()->with('error', 'Por favor ingresa un número de DNI');
-        }
-
-        // Token de la API
-        $token = 'apis-token-11902.pdect35br18u4qfOY32SlAiD745fr8i4';
-
-        // Llamada a la API
-        $curl = curl_init();
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://api.apis.net.pe/v2/reniec/dni?numero=' . $dni,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYPEER => 0,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 2,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_CUSTOMREQUEST => 'GET',
-            CURLOPT_HTTPHEADER => array(
-                'Referer: https://apis.net.pe/consulta-dni-api',
-                'Authorization: Bearer ' . $token
-            ),
-        ));
-
-        $response = curl_exec($curl);
-        curl_close($curl);
-
-        // Decodificar la respuesta
-        $persona = json_decode($response);
-
-        // Verificar si la respuesta es válida
-        if (isset($persona->nombres)) {
-            return view('admin', ['persona' => $persona]);
-        } else {
-            return view('admin', ['error' => 'No se encontraron datos para el DNI proporcionado.']);
-        }
-    }
-
+    // Función para cerrar sesión
     public function salir()
     {
         $session = session();
         $session->destroy();
         return redirect()->to(base_url('/'));
+    }
+
+    /** Devuelve los eventos para FullCalendar */
+    public function laboratoriosEvents()
+    {
+        $session = session();
+        if ($session->get('role_id') != 1 && $session->get('role_id') != 2) {
+            return $this->response->setStatusCode(403); // Verificar acceso
+        }
+
+        $lab = $this->request->getGet('lab'); // Recibe el parámetro lab_id desde el frontend
+
+        // Calcula inicio y fin de la semana actual
+        $startWeek = Time::now()->startOfWeek()->toDateTimeString();
+        $endWeek   = Time::now()->endOfWeek()->toDateTimeString();
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('reservations');
+        $builder->select('r.id, u.username AS title, r.start_time AS start, r.end_time AS end');
+        $builder->join('users u', 'u.id = r.user_id');
+        $builder->where('r.lab_id', (int)$lab); // Filtra los eventos por el laboratorio
+        $builder->where('r.start_time >=', $startWeek);
+        $builder->where('r.end_time <=', $endWeek);
+        $events = $builder->get()->getResultArray();
+
+        return $this->response->setJSON($events); // Retorna los eventos específicos del laboratorio
+    }
+
+    // Función para guardar una nueva reserva
+    public function guardarReserva()
+    {
+            $session = session();
+        if ($session->get('role_id') != 1 && $session->get('role_id') != 2) {
+            return $this->response->setStatusCode(403); // Verificar acceso
+        }
+
+        $userId = $session->get('id_usuario');
+        $labId  = $this->request->getPost('lab_id');
+        $date   = $this->request->getPost('date');
+        $startT = $this->request->getPost('start_time');
+        $endT   = $this->request->getPost('end_time');
+
+        // Validar que esté dentro de la semana actual
+        // Obtener el lunes de la semana actual
+        $startWeek = date('Y-m-d', strtotime('monday this week'));
+        // Obtener el domingo de la semana actual
+        $endWeek = date('Y-m-d', strtotime('sunday this week'));
+
+        $startDateTime = strtotime("$date $startT");
+        $endDateTime = strtotime("$date $endT");
+
+        // Comprobar si la fecha de inicio y fin están dentro de la semana actual
+        if ($startDateTime < strtotime($startWeek) || $endDateTime > strtotime($endWeek)) {
+            return redirect()->back()->with('error', 'Solo puedes reservar en la semana actual.');
+        }
+
+        // Verificar solapamientos
+        $reservationsModel = new ReservationsModel();
+        if ($reservationsModel->checkForOverlap($labId, $startDateTime, $endDateTime)) {
+            return redirect()->back()->with('error', 'Ese horario ya está reservado.');
+        }
+
+        // Insertar reserva
+        $reservationsModel->insertReservation([
+            'user_id'    => $userId,
+            'lab_id'     => $labId,
+            'start_time' => date('Y-m-d H:i:s', $startDateTime),
+            'end_time'   => date('Y-m-d H:i:s', $endDateTime),
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return redirect()->back()->with('success', 'Reserva creada correctamente.');
     }
 }

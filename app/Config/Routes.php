@@ -7,29 +7,26 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 // Página principal (Login)
-$routes->get('/', 'Home::index'); // Página principal (login)
-$routes->post('/login', 'Home::login'); // Procesar login
-$routes->get('/salir', 'Home::salir'); // Procesar logout
+$routes->get('/', 'Home::index');  // Página principal (login)
+$routes->post('/login', 'Home::login');  // Procesar login
+$routes->get('/salir', 'Home::salir');  // Procesar logout
 
-// Rutas diferenciadas por roles
-$routes->get('/inicio', 'Home::inicio'); // Vista para estudiantes
+// Rutas para docentes
+$routes->get('/inicio', 'Home::inicio');  // Vista para docentes
+
+// Rutas para administradores
 $routes->get('/admin', 'Home::admin');  // Vista para administradores
 
-// Ruta para consultar DNI en el panel de administración
-$routes->post('/admin/consultarDNI', 'Home::consultarDNI');
+// Laboratorios Admin
+$routes->get('/admin/laboratorios', 'Home::laboratoriosAdmin');  // Ver lista de laboratorios
+$routes->get('/admin/laboratorios/crear', 'Home::crearLaboratorio');  // Crear nuevo laboratorio
+$routes->get('/admin/laboratorios/reservar/(:num)', 'Home::reservarLaboratorio/$1');  // Reservar laboratorio (admin)
+$routes->post('/admin/laboratorios/reservar', 'Home::guardarReserva');  // Guardar reserva (admin)
 
-// Rutas para las secciones del panel administrativo
-$routes->get('/admin/mis_tutorados', 'Home::misTutorados'); // Mis Tutorados
-$routes->get('/admin/tutorias_finalizadas', 'Home::tutoriasFinalizadas'); // Tutorías Finalizadas
-$routes->get('/admin/chat', 'Home::chat'); // Chat
+// Rutas para docentes
+$routes->get('/docente/laboratorios', 'Home::laboratoriosDocentes');  // Ver lista de laboratorios
+$routes->get('/docente/laboratorios/reservar/(:num)', 'Home::reservarLaboratorio/$1');  // Reservar laboratorio (docente)
+$routes->post('/docente/laboratorios/reservar', 'Home::guardarReserva');  // Guardar reserva (docente)
 
-// Rutas específicas para estudiantes
-$routes->get('/estudiante/mis_tutores', 'Home::misTutores'); // Mis Tutores
-$routes->get('/estudiante/tutorias_finalizadas', 'Home::tutoriasFinalizadasEstudiante'); // Tutorías Finalizadas
-$routes->get('/estudiante/chat', 'Home::chatEstudiante'); // Chat para estudiantes
-
-// Ruta para consultar código de estudiante
-$routes->post('/inicio/consultarEstudiante', 'Home::consultarEstudiante'); // Consulta de código de estudiante
-
-// Ruta de acceso denegado
-$routes->get('/no_permission', 'Home::noPermission'); // Vista para acceso denegado
+// Ruta para acceso denegado
+$routes->get('/no_permission', 'Home::noPermission');  // Vista para acceso denegado

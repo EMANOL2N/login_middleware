@@ -89,8 +89,8 @@
     <div class="login-container">
         <!-- Panel Izquierdo -->
         <div class="left-panel">
-            <img src="<?= base_url('images/logo.png') ?>" alt="Logo Universidad">
-            <h1>Gestión de Tutorías</h1>
+            <img src="<?= base_url('images/logo2.png') ?>" alt="Logo Facultad">
+            <h1>Reserva de Laboratorios (SIGAU)</h1>
             <p>Ingrese sus credenciales para continuar</p>
         </div>
 

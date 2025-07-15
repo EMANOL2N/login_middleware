@@ -1,122 +1,147 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Inicio - Estudiante</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sistema de Reserva de Laboratorios - UNA PUNO</title>
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
     <style>
-        body {
-            background-color: #f7f9fc;
-            font-family: Arial, sans-serif;
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        .navbar {
-            background-color: #003865;
+        /* Navbar fijo */
+        nav.navbar {
+            background-color: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            padding: 0.5rem 1rem;
+            z-index: 1100;
         }
-
         .navbar-brand {
-            color: #fff;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #0d3b66;
         }
-
-        .navbar .nav-link {
-            color: #fff !important;
+        .navbar-brand img {
+            height: 40px;
+            margin-right: 10px;
         }
-
+        .navbar-nav .nav-link {
+            color: #333;
+            font-weight: 500;
+            margin-right: 1rem;
+        }
+        .navbar-nav .nav-link.active {
+            color: #0d3b66;
+        }
+        .user-info {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 0.5rem;
+        }
         .sidebar {
-            background-color: #003865;
-            color: #fff;
-            height: 100vh;
             position: fixed;
-            padding: 20px 10px;
-            width: 250px;
+            top: 56px;
+            left: 0;
+            height: calc(100vh - 56px);
+            width: 70px;
+            background-color: #1d2d50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            transition: width 0.3s;
+            overflow: hidden;
         }
-
+        .sidebar:hover { width:220px; overflow-y:auto; }
         .sidebar a {
-            color: #fff;
-            text-decoration: none;
-            display: block;
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin-bottom: 5px;
+            color: #a9bcd0;
+            width:100%;
+            padding:15px 10px;
+            display:flex;
+            align-items:center;
+            text-decoration:none;
+            transition:background-color .3s;
         }
-
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #0056b3;
+        .sidebar a i { min-width:30px; text-align:center; }
+        .sidebar a:hover, .sidebar a.active {
+            background-color:#0d3b66;
+            color:#fff;
         }
+        .sidebar a span {
+            margin-left:10px;
+            opacity:0;
+            transition:opacity .3s;
+        }
+        .sidebar:hover a span { opacity:1; }
 
         .content {
-            margin-left: 270px;
-            padding: 20px;
+            margin-left:70px;
+            padding:20px;
+            transition:margin-left .3s;
         }
+        .sidebar:hover ~ .content { margin-left:220px; }
 
-        .card {
-            margin-top: 20px;
-        }
-
-        .alert {
-            max-width: 800px;
-            margin: 20px auto;
+        @media (max-width: 768px) {
+            .sidebar, .sidebar:hover { width:220px; position:relative; }
+            .content, .sidebar:hover ~ .content { margin-left:0; padding:15px; }
         }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <a class="navbar-brand" href="#">UNA PUNO - Estudiante</a>
-        <div class="ml-auto">
-            <span class="navbar-text text-white mr-3"><?= session('usuario') ?> (ESTUDIANTE)</span>
-            <a href="<?= base_url('/salir') ?>" class="btn btn-outline-light">Cerrar Sesión</a>
+    <nav class="navbar">
+        <a href="#" class="navbar-brand d-flex align-items-center">
+        <img src="<?= base_url('images/logo1.png') ?>" alt="Logo UNA">
+        UNA - PUNO
+        </a>
+        <div class="user-info ml-auto d-flex align-items-center">
+        <span><?= session('username') ?? 'Invitado' ?></span>
+        <img src="https://i.pravatar.cc/40" alt="Foto Usuario" />
+        <!-- Cerrar sesión -->
+        <a href="<?= base_url('/salir') ?>" class="btn btn-outline-danger btn-sm ml-3">Cerrar Sesión</a>
         </div>
     </nav>
 
     <!-- Sidebar -->
     <div class="sidebar">
-        <h4>Panel de Control</h4>
-        <a href="<?= base_url('/inicio') ?>" class="<?= current_url() == base_url('/inicio') ? 'active' : '' ?>"><i class="fas fa-home"></i> Inicio</a>
-        <a href="<?= base_url('/estudiante/mis_tutores') ?>" class="<?= current_url() == base_url('/estudiante/mis_tutores') ? 'active' : '' ?>"><i class="fas fa-user"></i> Mis Tutores</a>
-        <a href="<?= base_url('/estudiante/tutorias_finalizadas') ?>" class="<?= current_url() == base_url('/estudiante/tutorias_finalizadas') ? 'active' : '' ?>"><i class="fas fa-file-alt"></i> Tutorías Finalizadas</a>
-        <a href="<?= base_url('/estudiante/chat') ?>" class="<?= current_url() == base_url('/estudiante/chat') ? 'active' : '' ?>"><i class="fas fa-comments"></i> Chat</a>
+        <a href="<?= base_url('/inicio') ?>" class="<?= current_url()==base_url('/inicio') ? 'active' : '' ?>">
+            <i class="fas fa-home"></i> <span>Inicio</span>
+        </a>
+        <a href="<?= base_url('/docente/laboratorios') ?>" class="<?= current_url()==base_url('/docente/laboratorios')?'active':'' ?>">
+        <i class="fas fa-flask"></i><span>Laboratorios</span>
+        </a>
     </div>
 
-    <!-- Main Content -->
-    <div class="content">
-        <div class="card">
-            <div class="card-header">Consultar Estudiante</div>
-            <div class="card-body">
-                <p class="lead">Ingrese el código del estudiante para obtener sus datos.</p>
-
-                <!-- Formulario para consultar estudiante -->
-                <form action="<?= base_url('inicio/consultarEstudiante') ?>" method="post">
-                    <label for="codigo">Código del Estudiante:</label>
-                    <input type="text" name="codigo" id="codigo" class="form-control" placeholder="Ejemplo: 123456" required>
-                    <button type="submit" class="btn btn-primary mt-3">Consultar</button>
-                </form>
-
-                <!-- Mostrar errores -->
-                <?php if (isset($error)): ?>
-                    <div class="alert alert-danger mt-3"><?= $error ?></div>
-                <?php endif; ?>
-
-                <!-- Mostrar datos del estudiante -->
-                <?php if (isset($nombres)): ?>
-                    <div class="alert alert-success mt-3">
-                        <h4>Datos del Estudiante:</h4>
-                        <p><strong>Nombres:</strong> <?= $nombres ?></p>
-                        <p><strong>Apellidos:</strong> <?= $apellidos ?></p>
-                        <p><strong>Correo Institucional:</strong> <?= $correo ?></p>
-                        <p><strong>Celular:</strong> <?= $celular ?></p>
-                    </div>
-                <?php endif; ?>
-            </div>
+<!-- Main Content -->
+<div class="content">
+    <!-- Card de Bienvenida -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body text-center py-5">
+        <h2 class="card-title display-4 font-weight-bold mb-3">
+            <i class="fas fa-flask text-primary"></i>
+            Bienvenido al Sistema de Reserva de Laboratorios
+        </h2>
+        <p class="card-text lead mb-4">
+            Desde aquí puedes gestionar tus reservas de laboratorios de manera sencilla.
+        </p>
+        <a href="<?= base_url('/docente/laboratorios') ?>" class="btn btn-primary btn-lg">
+            <i class="fas fa-calendar-plus mr-2"></i> Reservar Laboratorio
+        </a>
         </div>
     </div>
+</div>
 
     <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
